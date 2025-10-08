@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, Maximize2, Monitor, Presentation } from 'lucide-react';
-import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, Sector, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const ValueEngPresentation = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [presenterMode, setPresenterMode] = useState(false);
   const [animateIn, setAnimateIn] = useState(true);
+  const [activeCitrixSegment, setActiveCitrixSegment] = useState(null);
+  const [activeOmnissaSegment, setActiveOmnissaSegment] = useState(null);
 
   // Nerdio Brand Colors
   const brandColors = {
@@ -136,6 +138,7 @@ const ValueEngPresentation = () => {
           status: 'LIVE TODAY',
           description: 'Show what every week of delay costs',
           impact: 'Eliminates "we have time"',
+          url: 'https://nerdio-timeline-calculator.vercel.app/',
           delay: 0
         },
         {
@@ -184,6 +187,8 @@ const ValueEngPresentation = () => {
 
   useEffect(() => {
     setAnimateIn(false);
+    setActiveCitrixSegment(null);
+    setActiveOmnissaSegment(null);
     setTimeout(() => setAnimateIn(true), 50);
   }, [currentSlide]);
 
@@ -192,6 +197,37 @@ const ValueEngPresentation = () => {
       setCurrentSlide(currentSlide + 1);
     }
   }, [currentSlide, slides.length]);
+
+  const renderActiveShape = (props) => {
+    const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill, payload } = props;
+    
+    return (
+      <g>
+        <defs>
+          <filter id="active-glow">
+            <feGaussianBlur stdDeviation="5" result="coloredBlur"/>
+            <feMerge>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+        <Sector
+          cx={cx}
+          cy={cy}
+          innerRadius={innerRadius}
+          outerRadius={outerRadius + 20}
+          startAngle={startAngle}
+          endAngle={endAngle}
+          fill={fill}
+          fillOpacity={0.95}
+          stroke="rgba(255, 255, 255, 0.5)"
+          strokeWidth={3}
+          filter="url(#active-glow)"
+        />
+      </g>
+    );
+  };
 
   const prevSlide = useCallback(() => {
     if (currentSlide > 0) {
@@ -293,38 +329,54 @@ const ValueEngPresentation = () => {
 
       case 'dualChart':
         return (
-          <div className="h-full flex flex-col px-20 py-12 text-white"
+          <div className="h-full flex flex-col px-20 py-10 text-white"
                style={{ background: `linear-gradient(135deg, ${brandColors.navy} 0%, #1e293b 100%)` }}>
-            <div className="text-center mb-8">
+            <div className="text-center mb-6">
               <h2 className="text-6xl font-bold mb-3 leading-tight" style={{ fontFamily: 'Inter, sans-serif' }}>{slide.title}</h2>
               {slide.subtitle && <p className="text-2xl font-normal text-gray-400" style={{ fontFamily: 'Inter, sans-serif' }}>{slide.subtitle}</p>}
             </div>
-            <div className="flex-1 flex items-center justify-center">
-              <div className="flex gap-12 items-center justify-center w-full max-w-7xl">
+            <div className="flex-1 flex items-center justify-center overflow-visible">
+              <div className="flex gap-8 items-center justify-center w-full max-w-7xl">
                 {/* Citrix Chart */}
                 <div className="flex-1 flex flex-col items-center">
-                  <div className="relative mb-6">
+                  <div className="relative mb-4">
                     <h3 className="relative text-4xl font-bold" style={{ fontFamily: 'Inter, sans-serif', color: brandColors.accent.cyan }}>Citrix</h3>
                   </div>
                   <div className="relative">
                     <div className="absolute -inset-8 rounded-full blur-3xl opacity-20" style={{ background: `radial-gradient(circle, ${brandColors.accent.cyan}60, transparent)` }}></div>
-                    <div className="relative bg-white/[0.03] backdrop-blur-xl rounded-3xl p-6 border border-white/10 shadow-2xl">
-                      <ResponsiveContainer width={520} height={520}>
+                    <div className="relative bg-white/[0.03] backdrop-blur-xl rounded-3xl p-4 border border-white/10 shadow-2xl">
+                      <ResponsiveContainer width={580} height={580}>
                         <PieChart>
+                          <defs>
+                            {slide.citrixData.map((entry, index) => (
+                              <filter key={`filter-citrix-${index}`} id={`glow-citrix-${index}`}>
+                                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                                <feMerge>
+                                  <feMergeNode in="coloredBlur"/>
+                                  <feMergeNode in="SourceGraphic"/>
+                                </feMerge>
+                              </filter>
+                            ))}
+                          </defs>
                           <Pie
                             data={slide.citrixData}
                             cx="50%"
                             cy="50%"
-                            innerRadius={90}
-                            outerRadius={160}
-                            paddingAngle={2}
+                            innerRadius={95}
+                            outerRadius={170}
+                            paddingAngle={3}
                             dataKey="value"
                             animationBegin={0}
                             animationDuration={1200}
-                            stroke="none"
-                            label={({ name, value, cx, cy, midAngle, innerRadius, outerRadius }) => {
+                            stroke="rgba(255, 255, 255, 0.3)"
+                            strokeWidth={2}
+                            activeIndex={activeCitrixSegment}
+                            activeShape={renderActiveShape}
+                            onClick={(data, index) => setActiveCitrixSegment(activeCitrixSegment === index ? null : index)}
+                            style={{ cursor: 'pointer' }}
+                            label={({ name, value, cx, cy, midAngle, outerRadius }) => {
                               const RADIAN = Math.PI / 180;
-                              const radius = outerRadius + 35;
+                              const radius = outerRadius + 50;
                               const x = cx + radius * Math.cos(-midAngle * RADIAN);
                               const y = cy + radius * Math.sin(-midAngle * RADIAN);
                               return (
@@ -334,7 +386,7 @@ const ValueEngPresentation = () => {
                                   fill="white" 
                                   textAnchor={x > cx ? 'start' : 'end'} 
                                   dominantBaseline="central"
-                                  style={{ fontSize: '13px', fontWeight: 600, fontFamily: 'Inter, sans-serif' }}
+                                  style={{ fontSize: '12px', fontWeight: 600, fontFamily: 'Inter, sans-serif' }}
                                 >
                                   {`${name}: ${value}%`}
                                 </text>
@@ -342,7 +394,12 @@ const ValueEngPresentation = () => {
                             }}
                           >
                             {slide.citrixData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.color} />
+                              <Cell 
+                                key={`cell-${index}`} 
+                                fill={entry.color}
+                                fillOpacity={0.85}
+                                filter={`url(#glow-citrix-${index})`}
+                              />
                             ))}
                           </Pie>
                         </PieChart>
@@ -353,28 +410,44 @@ const ValueEngPresentation = () => {
                 
                 {/* Omnissa Chart */}
                 <div className="flex-1 flex flex-col items-center">
-                  <div className="relative mb-6">
+                  <div className="relative mb-4">
                     <h3 className="relative text-4xl font-bold" style={{ fontFamily: 'Inter, sans-serif', color: brandColors.primary }}>Omnissa</h3>
                   </div>
                   <div className="relative">
                     <div className="absolute -inset-8 rounded-full blur-3xl opacity-20" style={{ background: `radial-gradient(circle, ${brandColors.primary}60, transparent)` }}></div>
-                    <div className="relative bg-white/[0.03] backdrop-blur-xl rounded-3xl p-6 border border-white/10 shadow-2xl">
-                      <ResponsiveContainer width={520} height={520}>
+                    <div className="relative bg-white/[0.03] backdrop-blur-xl rounded-3xl p-4 border border-white/10 shadow-2xl">
+                      <ResponsiveContainer width={580} height={580}>
                         <PieChart>
+                          <defs>
+                            {slide.omnissaData.map((entry, index) => (
+                              <filter key={`filter-omnissa-${index}`} id={`glow-omnissa-${index}`}>
+                                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                                <feMerge>
+                                  <feMergeNode in="coloredBlur"/>
+                                  <feMergeNode in="SourceGraphic"/>
+                                </feMerge>
+                              </filter>
+                            ))}
+                          </defs>
                           <Pie
                             data={slide.omnissaData}
                             cx="50%"
                             cy="50%"
-                            innerRadius={90}
-                            outerRadius={160}
-                            paddingAngle={2}
+                            innerRadius={95}
+                            outerRadius={170}
+                            paddingAngle={3}
                             dataKey="value"
                             animationBegin={200}
                             animationDuration={1200}
-                            stroke="none"
-                            label={({ name, value, cx, cy, midAngle, innerRadius, outerRadius }) => {
+                            stroke="rgba(255, 255, 255, 0.3)"
+                            strokeWidth={2}
+                            activeIndex={activeOmnissaSegment}
+                            activeShape={renderActiveShape}
+                            onClick={(data, index) => setActiveOmnissaSegment(activeOmnissaSegment === index ? null : index)}
+                            style={{ cursor: 'pointer' }}
+                            label={({ name, value, cx, cy, midAngle, outerRadius }) => {
                               const RADIAN = Math.PI / 180;
-                              const radius = outerRadius + 35;
+                              const radius = outerRadius + 50;
                               const x = cx + radius * Math.cos(-midAngle * RADIAN);
                               const y = cy + radius * Math.sin(-midAngle * RADIAN);
                               return (
@@ -384,7 +457,7 @@ const ValueEngPresentation = () => {
                                   fill="white" 
                                   textAnchor={x > cx ? 'start' : 'end'} 
                                   dominantBaseline="central"
-                                  style={{ fontSize: '13px', fontWeight: 600, fontFamily: 'Inter, sans-serif' }}
+                                  style={{ fontSize: '12px', fontWeight: 600, fontFamily: 'Inter, sans-serif' }}
                                 >
                                   {`${name}: ${value}%`}
                                 </text>
@@ -392,7 +465,12 @@ const ValueEngPresentation = () => {
                             }}
                           >
                             {slide.omnissaData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.color} />
+                              <Cell 
+                                key={`cell-${index}`} 
+                                fill={entry.color}
+                                fillOpacity={0.85}
+                                filter={`url(#glow-omnissa-${index})`}
+                              />
                             ))}
                           </Pie>
                         </PieChart>
@@ -403,7 +481,7 @@ const ValueEngPresentation = () => {
               </div>
             </div>
             {slide.highlight && (
-              <div className={`text-4xl font-bold text-center mt-6 transition-all duration-1000 delay-[2000ms] ${animateIn ? 'opacity-100' : 'opacity-0'}`}
+              <div className={`text-3xl font-bold text-center mt-4 transition-all duration-1000 delay-[2000ms] ${animateIn ? 'opacity-100' : 'opacity-0'}`}
                    style={{ fontFamily: 'Inter, sans-serif', color: brandColors.accent.lime }}>
                 {slide.highlight}
               </div>
@@ -594,15 +672,19 @@ const ValueEngPresentation = () => {
         <div className="flex items-center gap-4">
           <button
             onClick={() => setPresenterMode(!presenterMode)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-200 font-semibold"
+            className="group relative flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-500 font-semibold overflow-hidden hover:scale-105"
             style={{ backgroundColor: brandColors.primary, fontFamily: 'Inter, sans-serif' }}>
-            {presenterMode ? <Monitor size={20} /> : <Presentation size={20} />}
-            {presenterMode ? 'Presenter Mode' : 'Audience Mode'}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+            <div className="relative z-10 flex items-center gap-2">
+              {presenterMode ? <Monitor size={20} /> : <Presentation size={20} />}
+              <span className="transition-all duration-500 group-hover:tracking-wider">{presenterMode ? 'Presenter Mode' : 'Audience Mode'}</span>
+            </div>
           </button>
           <button
             onClick={() => document.documentElement.requestFullscreen()}
-            className="p-2 hover:bg-white/10 rounded-xl transition-all duration-200">
-            <Maximize2 size={20} />
+            className="group relative p-2 hover:bg-white/10 rounded-xl transition-all duration-300 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+            <Maximize2 size={20} className="relative z-10" />
           </button>
         </div>
         <div className="text-sm font-semibold text-gray-400" style={{ fontFamily: 'Inter, sans-serif' }}>
@@ -652,29 +734,35 @@ const ValueEngPresentation = () => {
         <button
           onClick={prevSlide}
           disabled={currentSlide === 0}
-          className="p-3 rounded-xl transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
+          className="group relative p-3 rounded-xl transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed overflow-hidden"
           style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}>
-          <ChevronLeft size={24} />
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+          <ChevronLeft size={24} className="relative z-10" />
         </button>
         <div className="flex gap-2">
           {slides.map((_, idx) => (
             <button
               key={idx}
               onClick={() => setCurrentSlide(idx)}
-              className={`h-3 rounded-full transition-all duration-300`}
+              className={`h-3 rounded-full transition-all duration-300 hover:scale-110 relative overflow-hidden group`}
               style={{ 
                 width: idx === currentSlide ? '40px' : '12px',
                 backgroundColor: idx === currentSlide ? brandColors.primary : 'rgba(255,255,255,0.3)'
               }}
-            />
+            >
+              {idx === currentSlide && (
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse"></div>
+              )}
+            </button>
           ))}
         </div>
         <button
           onClick={nextSlide}
           disabled={currentSlide === slides.length - 1}
-          className="p-3 rounded-xl transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
+          className="group relative p-3 rounded-xl transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed overflow-hidden"
           style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}>
-          <ChevronRight size={24} />
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+          <ChevronRight size={24} className="relative z-10" />
         </button>
       </div>
     </div>
@@ -701,8 +789,21 @@ const StatCard = ({ value, label, color, delay = 0, show }) => (
   >
     <div className="absolute -inset-2 rounded-3xl blur-2xl opacity-50 group-hover:opacity-75 transition-all duration-500" 
          style={{ background: `radial-gradient(circle, ${color}40 0%, transparent 70%)` }}></div>
-    <div className="relative backdrop-blur-xl rounded-3xl p-12 border border-white/20 shadow-2xl hover:border-white/30 hover:scale-105 transition-all duration-300 text-center"
+    
+    {/* Top glow bar */}
+    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-2 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:w-3/4 group-hover:h-1/2"
+         style={{ background: color, boxShadow: `0 0 20px ${color}, 0 0 40px ${color}`, filter: 'blur(8px)' }}></div>
+    
+    {/* Bottom glow bar */}
+    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-2 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:w-3/4 group-hover:h-1/2"
+         style={{ background: color, boxShadow: `0 0 20px ${color}, 0 0 40px ${color}`, filter: 'blur(8px)' }}></div>
+    
+    <div className="relative backdrop-blur-xl rounded-3xl p-12 border border-white/20 shadow-2xl hover:border-white/30 hover:scale-105 transition-all duration-500 text-center overflow-hidden"
          style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
+      
+      {/* Shine effect on hover */}
+      <div className="absolute top-0 left-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-[200%] transition-transform duration-700 skew-x-12"></div>
+      
       <div className="text-7xl font-black mb-4 tracking-tight px-4" style={{ 
         color: color,
         textShadow: `0 0 60px ${color}80, 0 0 30px ${color}60`,
@@ -710,7 +811,7 @@ const StatCard = ({ value, label, color, delay = 0, show }) => (
       }}>
         {value}
       </div>
-      <div className="text-xl font-semibold uppercase tracking-wide leading-tight px-2" 
+      <div className="text-xl font-semibold uppercase tracking-wide leading-tight px-2 transition-all duration-500 group-hover:tracking-wider" 
            style={{ fontFamily: 'Inter, sans-serif', color: '#ffffff', textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>
         {label}
       </div>
@@ -719,17 +820,18 @@ const StatCard = ({ value, label, color, delay = 0, show }) => (
 );
 
 // Tool Card Component
-const ToolCard = ({ name, status, description, impact, delay = 0, show, brandColors }) => (
-  <div
-    className={`group relative transition-all duration-1000 hover:scale-[1.01] ${show ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
-    style={{ transitionDelay: `${delay}ms` }}
-  >
-    <div className="absolute -inset-2 rounded-3xl blur-xl group-hover:blur-2xl transition-all duration-500"
-         style={{ background: `linear-gradient(90deg, ${brandColors.primary}20, ${brandColors.accent.cyan}20)` }}></div>
-    <div className="relative bg-white/[0.05] backdrop-blur-xl rounded-3xl p-6 border border-white/10 shadow-2xl hover:border-white/20 transition-all duration-300">
+const ToolCard = ({ name, status, description, impact, url, delay = 0, show, brandColors }) => {
+  const CardContent = () => (
+    <>
+      {/* Shine sweep effect */}
+      <div className="absolute top-0 left-0 w-1/3 h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-[300%] transition-transform duration-1000 skew-x-12"></div>
+      
       <div className="flex items-start justify-between mb-4 gap-6">
-        <h3 className="text-2xl font-bold leading-tight flex-1" style={{ fontFamily: 'Inter, sans-serif' }}>{name}</h3>
-        <span className="px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider shadow-lg whitespace-nowrap"
+        <h3 className="text-2xl font-bold leading-tight flex-1 transition-all duration-500 group-hover:tracking-wide" style={{ fontFamily: 'Inter, sans-serif' }}>
+          {name}
+          {url && <span className="ml-2 text-sm opacity-70">🔗</span>}
+        </h3>
+        <span className="px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider shadow-lg whitespace-nowrap transition-all duration-500 group-hover:shadow-2xl"
               style={{ 
                 backgroundColor: brandColors.accent.lime, 
                 color: brandColors.navy,
@@ -744,20 +846,58 @@ const ToolCard = ({ name, status, description, impact, delay = 0, show, brandCol
         <span style={{ color: brandColors.accent.lime, fontSize: '18px' }}>→</span>
         <span style={{ color: brandColors.accent.lime, fontFamily: 'Inter, sans-serif' }}>{impact}</span>
       </div>
+    </>
+  );
+
+  const containerClasses = `group relative transition-all duration-1000 hover:scale-[1.02] ${show ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'} ${url ? 'cursor-pointer' : ''}`;
+
+  return (
+    <div
+      className={containerClasses}
+      style={{ transitionDelay: `${delay}ms` }}
+      onClick={url ? () => window.open(url, '_blank') : undefined}
+    >
+      <div className="absolute -inset-2 rounded-3xl blur-xl group-hover:blur-2xl transition-all duration-500"
+           style={{ background: `linear-gradient(90deg, ${brandColors.primary}20, ${brandColors.accent.cyan}20)` }}></div>
+      
+      {/* Top subtle glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:w-2/3 group-hover:h-1/3"
+           style={{ background: `linear-gradient(90deg, ${brandColors.primary}, ${brandColors.accent.cyan})`, boxShadow: `0 0 15px ${brandColors.primary}`, filter: 'blur(6px)' }}></div>
+      
+      {/* Bottom subtle glow */}
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-1 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:w-2/3 group-hover:h-1/3"
+           style={{ background: `linear-gradient(90deg, ${brandColors.accent.cyan}, ${brandColors.primary})`, boxShadow: `0 0 15px ${brandColors.accent.cyan}`, filter: 'blur(6px)' }}></div>
+      
+      <div className="relative bg-white/[0.05] backdrop-blur-xl rounded-3xl p-6 border border-white/10 shadow-2xl hover:border-white/20 transition-all duration-500 overflow-hidden">
+        <CardContent />
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 // Goal Card Component
 const GoalCard = ({ metric, current, target, unit, delay = 0, show, brandColors }) => (
   <div
-    className={`group relative transition-all duration-1000 hover:scale-[1.01] ${show ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'}`}
+    className={`group relative transition-all duration-1000 hover:scale-[1.02] ${show ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'}`}
     style={{ transitionDelay: `${delay}ms` }}
   >
     <div className="absolute -inset-2 rounded-3xl blur-xl group-hover:blur-2xl transition-all duration-500"
          style={{ background: `linear-gradient(90deg, ${brandColors.primary}20, ${brandColors.accent.lime}20)` }}></div>
-    <div className="relative bg-white/[0.05] backdrop-blur-xl rounded-3xl p-6 border border-white/10 shadow-2xl hover:border-white/20 transition-all duration-300">
-      <h3 className="text-xl font-bold mb-5 leading-tight" style={{ fontFamily: 'Inter, sans-serif' }}>{metric}</h3>
+    
+    {/* Top subtle glow */}
+    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:w-3/4 group-hover:h-1/3"
+         style={{ background: `linear-gradient(90deg, ${brandColors.primary}, ${brandColors.accent.lime})`, boxShadow: `0 0 15px ${brandColors.primary}`, filter: 'blur(6px)' }}></div>
+    
+    {/* Bottom subtle glow */}
+    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-1 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:w-3/4 group-hover:h-1/3"
+         style={{ background: `linear-gradient(90deg, ${brandColors.accent.lime}, ${brandColors.primary})`, boxShadow: `0 0 15px ${brandColors.accent.lime}`, filter: 'blur(6px)' }}></div>
+    
+    <div className="relative bg-white/[0.05] backdrop-blur-xl rounded-3xl p-6 border border-white/10 shadow-2xl hover:border-white/20 transition-all duration-500 overflow-hidden">
+      
+      {/* Shine sweep effect */}
+      <div className="absolute top-0 left-0 w-1/3 h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-[300%] transition-transform duration-1000 skew-x-12"></div>
+      
+      <h3 className="text-xl font-bold mb-5 leading-tight transition-all duration-500 group-hover:tracking-wide" style={{ fontFamily: 'Inter, sans-serif' }}>{metric}</h3>
       <div className="flex items-center justify-between">
         <div className="text-center flex-1">
           <div className="text-5xl font-black mb-2" style={{ color: '#ef4444', fontFamily: 'Inter, sans-serif' }}>{current}{unit}</div>
