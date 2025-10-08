@@ -254,64 +254,102 @@ const ValueEngPresentation = () => {
       case 'dualChart':
         return (
           <div className="h-full flex flex-col justify-center px-16 bg-gradient-to-br from-slate-900 to-slate-800 text-white">
-            <h2 className="text-5xl font-bold mb-2">{slide.title}</h2>
+            <h2 className="text-5xl font-bold mb-2 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">{slide.title}</h2>
             {slide.subtitle && <p className="text-2xl text-gray-400 mb-8">{slide.subtitle}</p>}
             <div className="flex gap-8 items-center justify-center flex-1">
               {/* Citrix Chart */}
-              <div className="flex-1 flex flex-col items-center">
-                <h3 className="text-3xl font-bold mb-4 text-blue-400">Citrix</h3>
-                <ResponsiveContainer width="100%" height={400}>
-                  <PieChart>
-                    <Pie
-                      data={slide.citrixData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, value }) => `${name}: ${value}%`}
-                      outerRadius={120}
-                      fill="#8884d8"
-                      dataKey="value"
-                      animationBegin={0}
-                      animationDuration={1500}
-                    >
-                      {slide.citrixData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
+              <div className="flex-1 flex flex-col items-center group">
+                <div className="relative mb-6">
+                  <div className="absolute inset-0 bg-blue-500/30 rounded-full blur-2xl"></div>
+                  <h3 className="relative text-3xl font-bold text-blue-400 drop-shadow-lg">Citrix</h3>
+                </div>
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-3xl blur-2xl"></div>
+                  <div className="relative bg-white/5 backdrop-blur-sm rounded-3xl p-6 border border-white/10">
+                    <ResponsiveContainer width={400} height={400}>
+                      <PieChart>
+                        <Pie
+                          data={slide.citrixData}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={({ name, value }) => `${name}: ${value}%`}
+                          outerRadius={140}
+                          fill="#8884d8"
+                          dataKey="value"
+                          animationBegin={0}
+                          animationDuration={1500}
+                          stroke="#1e293b"
+                          strokeWidth={3}
+                        >
+                          {slide.citrixData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: '#1e293b', 
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            borderRadius: '12px',
+                            backdropFilter: 'blur(10px)',
+                            boxShadow: '0 8px 32px rgba(0,0,0,0.4)'
+                          }} 
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
               </div>
               
               {/* Omnissa Chart */}
-              <div className="flex-1 flex flex-col items-center">
-                <h3 className="text-3xl font-bold mb-4 text-purple-400">Omnissa</h3>
-                <ResponsiveContainer width="100%" height={400}>
-                  <PieChart>
-                    <Pie
-                      data={slide.omnissaData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, value }) => `${name}: ${value}%`}
-                      outerRadius={120}
-                      fill="#8884d8"
-                      dataKey="value"
-                      animationBegin={300}
-                      animationDuration={1500}
-                    >
-                      {slide.omnissaData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
+              <div className="flex-1 flex flex-col items-center group">
+                <div className="relative mb-6">
+                  <div className="absolute inset-0 bg-purple-500/30 rounded-full blur-2xl"></div>
+                  <h3 className="relative text-3xl font-bold text-purple-400 drop-shadow-lg">Omnissa</h3>
+                </div>
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-3xl blur-2xl"></div>
+                  <div className="relative bg-white/5 backdrop-blur-sm rounded-3xl p-6 border border-white/10">
+                    <ResponsiveContainer width={400} height={400}>
+                      <PieChart>
+                        <Pie
+                          data={slide.omnissaData}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={({ name, value }) => `${name}: ${value}%`}
+                          outerRadius={140}
+                          fill="#8884d8"
+                          dataKey="value"
+                          animationBegin={300}
+                          animationDuration={1500}
+                          stroke="#1e293b"
+                          strokeWidth={3}
+                        >
+                          {slide.omnissaData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: '#1e293b', 
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            borderRadius: '12px',
+                            backdropFilter: 'blur(10px)',
+                            boxShadow: '0 8px 32px rgba(0,0,0,0.4)'
+                          }} 
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
               </div>
             </div>
             {slide.highlight && (
-              <div className={`text-3xl font-bold text-center text-yellow-300 mb-8 transition-all duration-1000 delay-[2000ms] ${animateIn ? 'opacity-100' : 'opacity-0'}`}>
-                {slide.highlight}
+              <div className={`text-3xl font-bold text-center mb-8 transition-all duration-1000 delay-[2000ms] ${animateIn ? 'opacity-100' : 'opacity-0'}`}>
+                <span className="bg-gradient-to-r from-yellow-300 to-orange-400 bg-clip-text text-transparent drop-shadow-lg">
+                  {slide.highlight}
+                </span>
               </div>
             )}
           </div>
@@ -320,46 +358,106 @@ const ValueEngPresentation = () => {
       case 'chart':
         return (
           <div className="h-full flex flex-col justify-center px-16 bg-gradient-to-br from-slate-900 to-slate-800 text-white">
-            <h2 className="text-5xl font-bold mb-8">{slide.title}</h2>
+            <h2 className="text-5xl font-bold mb-8 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">{slide.title}</h2>
             <div className="flex-1 flex items-center justify-center">
               {slide.chartType === 'pie' ? (
-                <ResponsiveContainer width="60%" height="60%">
-                  <PieChart>
-                    <Pie
-                      data={slide.data}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, value }) => `${name}: ${value}%`}
-                      outerRadius={150}
-                      fill="#8884d8"
-                      dataKey="value"
-                      animationBegin={0}
-                      animationDuration={1500}
-                    >
-                      {slide.data.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-blue-500/10 rounded-3xl blur-3xl"></div>
+                  <div className="relative bg-white/5 backdrop-blur-sm rounded-3xl p-8 border border-white/10">
+                    <ResponsiveContainer width={600} height={500}>
+                      <PieChart>
+                        <Pie
+                          data={slide.data}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={({ name, value }) => `${name}: ${value}%`}
+                          outerRadius={180}
+                          fill="#8884d8"
+                          dataKey="value"
+                          animationBegin={0}
+                          animationDuration={1500}
+                          stroke="#1e293b"
+                          strokeWidth={3}
+                        >
+                          {slide.data.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: '#1e293b', 
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            borderRadius: '12px',
+                            backdropFilter: 'blur(10px)',
+                            boxShadow: '0 8px 32px rgba(0,0,0,0.4)'
+                          }} 
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
               ) : (
-                <ResponsiveContainer width="80%" height="60%">
-                  <BarChart data={slide.data}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#444" />
-                    <XAxis dataKey="name" stroke="#fff" />
-                    <YAxis stroke="#fff" />
-                    <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: 'none' }} />
-                    <Bar dataKey="value" fill="#8b5cf6" animationDuration={1500} />
-                    {slide.data[0].target && <Bar dataKey="target" fill="#10b981" animationDuration={1500} />}
-                  </BarChart>
-                </ResponsiveContainer>
+                <div className="relative w-4/5">
+                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-3xl blur-3xl"></div>
+                  <div className="relative bg-white/5 backdrop-blur-sm rounded-3xl p-8 border border-white/10">
+                    <ResponsiveContainer width="100%" height={450}>
+                      <BarChart data={slide.data}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#334155" strokeOpacity={0.3} />
+                        <XAxis 
+                          dataKey="name" 
+                          stroke="#94a3b8" 
+                          style={{ fontSize: '14px', fontWeight: 600 }}
+                        />
+                        <YAxis 
+                          stroke="#94a3b8" 
+                          style={{ fontSize: '14px', fontWeight: 600 }}
+                        />
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: '#1e293b', 
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            borderRadius: '12px',
+                            backdropFilter: 'blur(10px)',
+                            boxShadow: '0 8px 32px rgba(0,0,0,0.4)'
+                          }} 
+                          cursor={{ fill: 'rgba(139, 92, 246, 0.1)' }}
+                        />
+                        <Bar 
+                          dataKey="value" 
+                          fill="url(#colorValue)" 
+                          animationDuration={1500} 
+                          radius={[8, 8, 0, 0]}
+                        />
+                        {slide.data[0].target && (
+                          <Bar 
+                            dataKey="target" 
+                            fill="url(#colorTarget)" 
+                            animationDuration={1500} 
+                            radius={[8, 8, 0, 0]}
+                          />
+                        )}
+                        <defs>
+                          <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#8b5cf6" stopOpacity={1}/>
+                            <stop offset="100%" stopColor="#6366f1" stopOpacity={0.8}/>
+                          </linearGradient>
+                          <linearGradient id="colorTarget" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#10b981" stopOpacity={1}/>
+                            <stop offset="100%" stopColor="#059669" stopOpacity={0.8}/>
+                          </linearGradient>
+                        </defs>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
               )}
             </div>
             {slide.highlight && (
-              <div className={`text-3xl font-bold text-center text-yellow-300 mt-8 transition-all duration-1000 delay-[2000ms] ${animateIn ? 'opacity-100' : 'opacity-0'}`}>
-                {slide.highlight}
+              <div className={`text-3xl font-bold text-center mt-8 transition-all duration-1000 delay-[2000ms] ${animateIn ? 'opacity-100' : 'opacity-0'}`}>
+                <span className="bg-gradient-to-r from-yellow-300 to-orange-400 bg-clip-text text-transparent drop-shadow-lg">
+                  {slide.highlight}
+                </span>
               </div>
             )}
           </div>
@@ -549,49 +647,61 @@ const AnimatedText = ({ text, delay = 0, highlight = false, style = '', show }) 
 // Stat Card Component
 const StatCard = ({ value, label, color, delay = 0, show }) => (
   <div
-    className={`text-center transition-all duration-1000 ${show ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}
+    className={`relative group transition-all duration-1000 ${show ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}
     style={{ transitionDelay: `${delay}ms` }}
   >
-    <div className="text-8xl font-bold mb-4" style={{ color }}>
-      {value}
+    <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-white/5 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-500"></div>
+    <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-8 border border-white/20 shadow-2xl hover:shadow-3xl hover:scale-105 transition-all duration-300">
+      <div className="text-7xl font-black mb-3 bg-gradient-to-br from-white to-gray-300 bg-clip-text text-transparent drop-shadow-lg" style={{ textShadow: `0 0 40px ${color}` }}>
+        {value}
+      </div>
+      <div className="text-xl font-medium text-gray-200 uppercase tracking-wider">{label}</div>
     </div>
-    <div className="text-2xl text-gray-300">{label}</div>
   </div>
 );
 
 // Tool Card Component
 const ToolCard = ({ name, status, description, impact, delay = 0, show }) => (
   <div
-    className={`bg-white/10 backdrop-blur-sm rounded-xl p-6 transition-all duration-1000 ${show ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+    className={`group relative transition-all duration-1000 hover:scale-[1.02] ${show ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
     style={{ transitionDelay: `${delay}ms` }}
   >
-    <div className="flex items-center justify-between mb-4">
-      <h3 className="text-3xl font-bold">{name}</h3>
-      <span className="px-4 py-2 bg-green-500 text-white rounded-full text-sm font-semibold">
-        {status}
-      </span>
+    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-500"></div>
+    <div className="relative bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl rounded-2xl p-8 border border-white/20 shadow-2xl">
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">{name}</h3>
+        <span className="px-5 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-full text-sm font-bold uppercase tracking-wider shadow-lg shadow-emerald-500/50">
+          {status}
+        </span>
+      </div>
+      <p className="text-xl text-gray-200 mb-4 leading-relaxed">{description}</p>
+      <div className="flex items-center gap-3 text-xl font-semibold text-transparent bg-gradient-to-r from-yellow-300 to-orange-400 bg-clip-text">
+        <span className="text-2xl">→</span>
+        <span>{impact}</span>
+      </div>
     </div>
-    <p className="text-xl text-gray-300 mb-3">{description}</p>
-    <p className="text-xl font-semibold text-yellow-300">→ {impact}</p>
   </div>
 );
 
 // Goal Card Component
 const GoalCard = ({ metric, current, target, unit, delay = 0, show }) => (
   <div
-    className={`bg-white/10 backdrop-blur-sm rounded-xl p-6 transition-all duration-1000 ${show ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'}`}
+    className={`group relative transition-all duration-1000 hover:scale-[1.02] ${show ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'}`}
     style={{ transitionDelay: `${delay}ms` }}
   >
-    <h3 className="text-2xl font-bold mb-4">{metric}</h3>
-    <div className="flex items-center justify-between">
-      <div className="text-center">
-        <div className="text-5xl font-bold text-red-400">{current}{unit}</div>
-        <div className="text-sm text-gray-400 mt-1">Current</div>
-      </div>
-      <div className="text-4xl text-yellow-300">→</div>
-      <div className="text-center">
-        <div className="text-5xl font-bold text-green-400">{target}{unit}</div>
-        <div className="text-sm text-gray-400 mt-1">Target</div>
+    <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-500"></div>
+    <div className="relative bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl rounded-2xl p-8 border border-white/20 shadow-2xl">
+      <h3 className="text-2xl font-bold mb-6 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">{metric}</h3>
+      <div className="flex items-center justify-between">
+        <div className="text-center flex-1">
+          <div className="text-6xl font-black bg-gradient-to-br from-red-400 to-red-600 bg-clip-text text-transparent drop-shadow-lg mb-2">{current}{unit}</div>
+          <div className="text-sm text-gray-400 uppercase tracking-wider font-semibold">Current</div>
+        </div>
+        <div className="text-5xl text-yellow-400 px-8 animate-pulse drop-shadow-lg">→</div>
+        <div className="text-center flex-1">
+          <div className="text-6xl font-black bg-gradient-to-br from-emerald-400 to-teal-500 bg-clip-text text-transparent drop-shadow-lg mb-2">{target}{unit}</div>
+          <div className="text-sm text-gray-400 uppercase tracking-wider font-semibold">Target</div>
+        </div>
       </div>
     </div>
   </div>
